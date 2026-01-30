@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: laravel-worker
+  namespace: default
+  labels:
+    app: laravel
+    tier: worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: laravel
+      tier: worker
+  template:
+    metadata:
+      labels:
+        app: laravel
+        tier: worker
+    spec:
+      terminationGracePeriodSeconds: 60 # Allow long jobs to finish
+      containers:
+        - name: worker
+          image: my-laravel-app:latest
+          imagePullPolicy: IfNotPresent
+          command: ["php", "artisan", "horizon"]
+          envFrom:
+            - configMapRef:
+                name: laravel-env
+            - secretRef:
+                name: laravel-secrets
+          readinessProbe:
+            exec:
+              command: ["php", "artisan", "horizon:status"]
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1024Mi"
+---
+# HPA for Worker using Custom Metrics (Queue Length)
+# Requires Prometheus Adapter to be configured.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: laravel-worker-hpa
+  namespace: default
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: laravel-worker
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+    - type: Object
+      object:
+        metric:
+          name: horizon_queue_length # Must correspond to a metric from Prometheus Adapter
+        describedObject:
+          apiVersion: apps/v1
+          kind: Deployment
+          name: laravel-worker
+        target:
+          type: Value
+          value: "50" # Target 50 jobs per replica

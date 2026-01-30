@@ -1,0 +1,16 @@
+/node_modules
+/public/build
+/public/hot
+/storage/*.key
+/vendor
+/.idea
+/.git
+/.github
+/tests
+/k8s
+env
+.env
+.local
+Dockerfile
+README.md
+phpunit.xml

@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: laravel-web
+  namespace: default
+  labels:
+    app: laravel
+    tier: web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: laravel
+      tier: web
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        app: laravel
+        tier: web
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: app
+          image: my-laravel-app:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: http
+          envFrom:
+            - configMapRef:
+                name: laravel-env
+            - secretRef:
+                name: laravel-secrets
+          livenessProbe:
+            httpGet:
+              path: /up
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /up
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"

@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: laravel-env
+  namespace: default
+data:
+  APP_ENV: "production"
+  APP_DEBUG: "false"
+  APP_URL: "https://example.com"
+  LOG_CHANNEL: "stderr"
+  BROADCAST_CONNECTION: "log"
+  CACHE_STORE: "redis"
+  FILESYSTEM_DISK: "s3"
+  QUEUE_CONNECTION: "redis"
+  SESSION_DRIVER: "redis"
+  SESSION_LIFETIME: "120"
+  DB_CONNECTION: "pgsql"
+  DB_HOST: "postgres-cluster-rw"
+  DB_PORT: "5432"
+  DB_DATABASE: "laravel"
+  REDIS_HOST: "redis-master"
+  REDIS_PORT: "6379"

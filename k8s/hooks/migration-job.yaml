@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: laravel-migrate
+  namespace: default
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  ttlSecondsAfterFinished: 60
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migrate
+          image: my-laravel-app:latest
+          command: ["php", "artisan", "migrate", "--force"]
+          envFrom:
+            - configMapRef:
+                name: laravel-env
+            - secretRef:
+                name: laravel-secrets

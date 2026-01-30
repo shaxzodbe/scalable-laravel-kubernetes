@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: laravel-scheduler
+  namespace: default
+  labels:
+    app: laravel
+    tier: scheduler
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate # Ensure only one runs at a time
+  selector:
+    matchLabels:
+      app: laravel
+      tier: scheduler
+  template:
+    metadata:
+      labels:
+        app: laravel
+        tier: scheduler
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: scheduler
+          image: my-laravel-app:latest
+          imagePullPolicy: IfNotPresent
+          command: ["php", "artisan", "schedule:work"]
+          envFrom:
+            - configMapRef:
+                name: laravel-env
+            - secretRef:
+                name: laravel-secrets
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
