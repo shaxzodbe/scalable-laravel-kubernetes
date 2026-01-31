@@ -41,30 +41,4 @@ spec:
             limits:
               cpu: "1000m"
               memory: "1024Mi"
----
-# HPA for Worker using Custom Metrics (Queue Length)
-# Requires Prometheus Adapter to be configured.
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: laravel-worker-hpa
-  namespace: default
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: laravel-worker
-  minReplicas: 1
-  maxReplicas: 10
-  metrics:
-    - type: Object
-      object:
-        metric:
-          name: horizon_queue_length # Must correspond to a metric from Prometheus Adapter
-        describedObject:
-          apiVersion: apps/v1
-          kind: Deployment
-          name: laravel-worker
-        target:
-          type: Value
-          value: "50" # Target 50 jobs per replica
+

@@ -1,0 +1,20 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: laravel-worker-scaler
+  namespace: default
+spec:
+  scaleTargetRef:
+    name: laravel-worker
+  minReplicaCount: 1     # Always keep 1 worker alive
+  maxReplicaCount: 10    # Or more based on cluster capacity
+  triggers:
+    - type: redis
+      metadata:
+        # "address" must be in format "host:port". 
+        # Since we use Kubernetes Service Discovery:
+        address: redis-master.default.svc.cluster.local:6379
+        listName: queue:default # Standard Horizon queue
+        listLength: "50"       # Target 50 jobs per worker
+      authenticationRef:
+        name: keda-redis-trigger-auth
