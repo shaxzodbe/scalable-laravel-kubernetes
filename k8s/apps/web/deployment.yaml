@@ -31,7 +31,7 @@ spec:
           ports:
             - containerPort: 80
               name: http
-          command: ["php", "artisan", "octane:start", "--server=frankenphp", "--host=0.0.0.0", "--port=80"]
+          command: ["php", "artisan", "octane:start", "--server=frankenphp", "--host=0.0.0.0", "--port=80", "--admin-port=2019"]
           envFrom:
             - configMapRef:
                 name: laravel-env
@@ -59,8 +59,8 @@ spec:
             failureThreshold: 3
           resources:
             requests:
-              cpu: "100m"
+              cpu: "500m"
               memory: "128Mi"
             limits:
-              cpu: "500m"
+              cpu: "2000m"
               memory: "512Mi"
