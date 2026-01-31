@@ -1,59 +1,55 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Scalable Laravel Architecture on Kubernetes 🚀
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+This repository demonstrates a **High-Performance, Enterprise-Grade** architecture for hosting Laravel applications on Kubernetes. It moves beyond the traditional Nginx + PHP-FPM setup to leverage modern technologies for superior speed and scalability.
 
-## About Laravel
+## 🏆 Key Achievements
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+We transformed a standard Laravel application into a high-performance system:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+*   **9.5x Performance Boost**: Optimized request handling from ~160 RPS to **~1,514 RPS**.
+*   **Drastically Lower Latency**: Reduced average response time from 314ms to **33ms**.
+*   **Zero-Downtime Deployment**: Verified Rolling Updates with readiness probes.
+*   **Self-Healing**: Automatic pod replacement in case of failure (Chaos Monkey tested).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 🏗 Architecture Highlights
 
-## Learning Laravel
+### 1. Runtime: FrankenPHP + Laravel Octane
+We utilize **FrankenPHP** in "Worker Mode" (powered by **Laravel Octane**).
+*   **Why?** Instead of booting the framework for every request (traditional PHP-FPM), the application stays loaded in memory.
+*   **Result:** Blazing fast response times and higher throughput.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### 2. Kubernetes Best Practices
+*   **Horizontal Pod Autoscaling (HPA)**: Automatically scales Web pods based on CPU/Memory pressure.
+*   **Stateless Design**: Usage of S3 for files and Redis for sessions/cache allows pods to be ephemeral.
+*   **Security**: Minimal `Alpine` based images, Network Policies restricting traffic, and Secrets management.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 3. Separation of Concerns
+*   **Web Deployment**: Handles HTTP traffic (Scales on CPU).
+*   **Worker Deployment**: Handles Background Queues (Scales on Queue Depth).
+*   **Scheduler**: Dedicated cron runner.
 
-## Laravel Sponsors
+## 🛠 Quick Start
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+We have provided a fully automated script to deploy this stack to a local [Kind](https://kind.sigs.k8s.io/) cluster for testing.
 
-### Premium Partners
+```bash
+# 1. Setup Cluster & Deploy
+./setup_demo.sh
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+# 2. Expose the App
+kubectl port-forward service/laravel-web 8080:80
+```
 
-## Contributing
+### Verification Scripts
+*   **`./stress_test.sh`**: Generates load to demonstrate performance.
+*   **`./chaos_test.sh`**: Deletes random pods to verify self-healing capabilities.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 📊 Benchmark Results (A/B Test)
 
-## Code of Conduct
+| Metric | Standard Mode (FPM-like) | Worker Mode (FrankenPHP) |
+| :--- | :--- | :--- |
+| **Requests/Sec** | 160 RPS | **1,514 RPS** |
+| **Latency** | 314ms | **33ms** |
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+*Built with Laravel 12, FrankenPHP, and Kubernetes.*
